@@ -1,0 +1,142 @@
+---
+title: "PG2"
+format: html
+editor: visual
+---
+
+
+
+
+```{r}
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(writexl)
+library(readxl)
+```
+
+
+```{r}
+DA <- read.csv("/Users/lissethrondan/R/EXCELactual.csv")
+ 
+DA <- DA[complete.cases(DA), ] 
+DA
+```
+
+```{r}
+unique(DA$MARCA_DISPOSITIVO)
+
+```
+
+```{r}
+DA$MARCA_DISPOSITIVO <- toupper(DA$MARCA_DISPOSITIVO)
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == ""] <- NA
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "REDMI C13"] <- "XIAOMI"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "REDMI NOTE 12"] <- "XIAOMI"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "XIOAMI"] <- "XIAOMI"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "XIOAMI"] <- "XIAOMI"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "XIOMI"] <- "XIAOMI"
+
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "OPPO A58"] <- "OPPO"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "REDMI"] <- "XIAOMI"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "LENOVO."] <- "LENOVO"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "MOTO"] <- "MOTOROLA"
+
+
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "IPHONE"] <- "APPLE"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "REALME"] <- "XIAOMI"
+
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "CHUWI"] <- "XIAOMI"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "SAMSUMG"] <- "SAMSUNG"
+DA$MARCA_DISPOSITIVO[DA$MARCA_DISPOSITIVO == "SANSUNG"] <- "SAMSUNG"
+
+
+DA$MARCA_DISPOSITIVO<- trimws(DA$MARCA_DISPOSITIVO)
+
+
+
+unique(DA$MARCA_DISPOSITIVO)
+```
+
+SEPARAR
+
+```{r}
+unique(DA$ACTIVIDAD)
+```
+
+**CAMBIO DE DA-\>DC**
+
+```{r}
+#separa datos con comas
+
+DC <- mutate(DA,
+                col_Estudios = ifelse(grepl("Estudios", ACTIVIDAD), 1, 0),
+                col_Investigación = ifelse(grepl("Investigación", ACTIVIDAD), 1, 0),
+                col_Entretenimiento = ifelse(grepl("Entretenimiento", ACTIVIDAD), 1, 0),
+                col_Otros = ifelse(grepl("Otros", ACTIVIDAD), 1, 0))
+
+
+
+```
+
+PARTE 2
+
+* Encuentran un par de eventos y analizan su dependencia o independencia de acuerdo a los criterios estipulados, en un contexto teórico o empírico.
+
+LOGRO ESPERADO: Estudian un par de eventos. Justifican, usando las probabilidades pertinentes sus conclusiones. Interpretan correctamente las mismas en el contexto de sus datos.
+
+
+
+Dependecia o independencia de EVENTO no de variables
+
+Variables y evento : 
+
+experimento esapcio muestral ( dedosnde vienes )
+Satisfaccion y marca-> Evento compuesto: seleccionar una persona del estudio " " cuya satisfacicon sea 5 y tenga cantidad de carga menor a 5 
+
+Satisfaccion y Cant de cargas -> 
+
+Evento1: que su satisfaccion sea 5 
+Evento 2: cantidad de cargas sea 3
+
+
+
+```{r}
+unique(DC$TIEMPO_DISPOSITIVO)
+unique(DC$CANTIDAD_CARGAS)
+```
+cant de cargas y consumo 
+cantidad de cargas + capacidad 
+
+```{r}
+table(DC$TIPO_DISPOSITIVO,DC$TIEMPO_DISPOSITIVO)
+```
+```{r}
+table(DC$CARRERA,DC$TIEMPO_DISPOSITIVO)
+```
+
+```{r}
+table(DC$SATISFACCION,DC$CANTIDAD_CARGAS)
+```
+```{r}
+table(DC$Capacidad.bateria.mAh.,DC$CANTIDAD_CARGAS)
+```
+
+```{r}
+table(DC$col_Entretenimiento,DC$TIPO_DISPOSITIVO)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
