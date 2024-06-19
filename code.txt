@@ -126,6 +126,45 @@ table(DC$Capacidad.bateria.mAh.,DC$CANTIDAD_CARGAS)
 ```{r}
 table(DC$col_Entretenimiento,DC$TIPO_DISPOSITIVO)
 ```
+E1: seleccionar a una persona del estudio “    “ cuyo dispositivo sea laptop   (condicional 1). Y su capacidad de batería sea 4000  (condicional 2 )
+
+E2: seleccionar a una persona del estudio “    “ cuyo dispositivo sea laptop (condicional 1). Y la cantidad de cargas sea 3 (condicional 2)
+
+```{r}
+tablita<-table(DC$Capacidad.bateria.mAh.==4000,DC$CANTIDAD_CARGAS)
+print(tablita)
+#DC$Capacidad.bateria.mAh.==4000
+
+#DC$CANTIDAD_CARGAS==3
+
+
+```
+```{r}
+# Suponiendo que el dataframe se llama DC
+
+# Crear un factor para los rangos de tiempo de uso como antes
+DC$TIEMPO_USO_factor <- cut(DC$TIEMPO_DISPOSITIVO, breaks=0:10, include.lowest=TRUE, right=FALSE)
+
+# Crear un factor para si la capacidad de la batería es 4000 mAh
+DC$Es_4000mAh <- DC$Capacidad.bateria.mAh. == 4000
+
+# Crear la tabla de contingencia
+tabla <- table(DC$TIEMPO_USO_factor, DC$Es_4000mAh)
+
+# Convertir la tabla en un dataframe
+df_tabla <- as.data.frame(tabla)
+
+# Cambiar los nombres de las columnas para reflejar los valores de Es_4000mAh y Tiempo de uso
+names(df_tabla) <- c("TIEMPO_USO_Rango", "Es_4000mAh", "Frecuencia")
+
+# Calcular los totales por rango de tiempo de uso
+df_tabla$total <- ave(df_tabla$Frecuencia, df_tabla$TIEMPO_USO_Rango, FUN=sum)
+
+# Mostrar el dataframe
+print(df_tabla)
+
+```
+
 
 
 
