@@ -1,0 +1,937 @@
+---
+title: "Informe"
+author: "Grupo 3"
+format:
+  html:
+    toc: true
+    toc-location: left
+    number-sections: true
+editor: visual
+embed-resources: true
+---
+
+# LEER CODIGO:
+
+```{r}
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(writexl)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(magrittr)
+library(gtools)
+library(scales)
+```
+
+```{r}
+DC<-read_csv("EXCELactual.csv")
+```
+
+# PROBABILISTICO
+
+> *Analisis del Consumo Energetico de los estudiantes de la universidad de ingenieria y tecnologia del ciclo 2024-1*
+
+```{r}
+r<-function(x){
+  round(x,digits = 4)
+}
+```
+
+> PARTE UNO DE LA RUBRICA
+
+VARIABLES
+
+**TIPO**: laptop, tablet, Smart TV, Celular,otros
+
+**CONSUMO ENERGETICO** : 200- 84000
+
+```{r}
+summary(DC$C_ENERGIA,na.rm = TRUE)
+
+```
+
+-   **Bajo**: 200 a 6000
+
+-   **Medio**: 6000 a 9867
+
+-   **Alto**: 9867 a 14100
+
+-   **Muy alto**: 14100 a 84000
+
+```{r}
+DC$Rango <- cut(DC$C_ENERGIA, 
+                breaks = c(-Inf, 6000, 9867, 14100, Inf), 
+                labels = c("Bajo", "Medio", "Alto", "Muy Alto"), 
+                right = FALSE)
+table(DC$Rango, useNA = "ifany")
+
+```
+
+> ## CUALITATIVA
+
+PARTE UNO DE LA RUBRICA:
+
+EVENTO SIMPLE 1:
+
+E1: Seleccionar un estudiante de la universidad UTEC 24-1 y observar que dispositivo electrónico utiliza: laptop, celular, tablet o audífonos.
+
+EVENTOS ATÓMICOS:
+
+A: La probabilidad de que un estudiante tenga una laptop
+
+B: La probabilidad de que un estudiante tenga un celular
+
+C: La probabilidad de que un estudiante tenga una tablet
+
+D: La probabilidad de que un estudiante tenga audífonos
+
+E: La probabilidad de que un estudiante tenga SmartTV
+
+F: La probabilidad de que un estudiante tenga otro tipo de dispositivo
+
+Espacio muestral S = {A, B, C, D, E, F}
+
+```{r}
+tl=NROW(DC)
+total=table(DC$TIPO_DISPOSITIVO)
+Ad=3;cl=421;lp=539;Ot=1;ST=2;Tb=89
+cat("Total de laptop, celular, tablet, audifonos, SmarTv y otros tipos de dispositivo electronico es:",tl,"\n")
+cat("La probabilidad de que un estudiante tenga una laptop es :", r(lp/tl), "\n")
+cat("La probabilidad de que un estudiante tenga un celular es :", r(cl/tl), "\n")
+cat("La probabilidad de que un estudiante tenga una tablet es :", r(Tb/tl), "\n")
+cat("La probabilidad de que un estudiante tenga una audifonos es :", r(Ad/tl), "\n")
+cat("La probabilidad de que un estudiante tenga un SmarTV es :", r(ST/tl),  "\n")
+cat("La probabilidad de que un estudiante tenga otro tipo de dispositivo es :", r(Ot/tl), "\n")
+```
+
+*Estas probabilidades sugieren que laptops y celulares son esenciales para la mayoría de los estudiantes, mientras que tablets y otros dispositivos tienen una adopción más limitada. Los audífonos, SmarTVs y otros dispositivos específicos tienen una presencia muy baja entre los estudiantes encuestados.*
+
+> #### CUANTITATIVA:
+
+EVENTO SIMPLE 2: Seleccionar un estudiante de la universidad UTEC y determinar que tipo de dispositivo electrónico tiene el mayor consumo energético promedio.
+
+```{r}
+agrupados = DC %>%
+  group_by(TIPO_DISPOSITIVO, Rango) %>%
+  summarise(cantidad = n(), .groups = 'drop')
+agrupados
+
+```
+
+```{r}
+#Audifonos
+audi= agrupados %>% filter(agrupados$TIPO_DISPOSITIVO=="Audifonos")
+
+#celular
+celu=agrupados %>% filter(agrupados$TIPO_DISPOSITIVO=="Celular")
+
+#laptop
+lapt=agrupados %>% filter(agrupados$TIPO_DISPOSITIVO=="Laptop")
+
+#Tablet
+tab=agrupados %>% filter(agrupados$TIPO_DISPOSITIVO=="Tablet")
+
+#Smartv
+tv=agrupados %>% filter(agrupados$TIPO_DISPOSITIVO=="Smart TV")
+
+#otros
+ot=agrupados %>% filter(agrupados$TIPO_DISPOSITIVO=="Otros")
+
+
+```
+
+```{r}
+#BAJO
+can_audi_bajo= audi$cantidad
+
+```
+
+```{r}
+#lapt
+
+#Bajo
+can_lapt_bajo=80
+#Medio
+can_lapt_medio=133
+#Alto
+can_lapt_alto=158
+#Muy alto
+can_lapt_mualto=168
+```
+
+```{r}
+#tab
+
+#Bajo
+can_tab_bajo=10
+#Medio
+can_tab_medio=24
+#Alto
+can_tab_alto=15
+#Muy alto
+can_tab_mualto=40
+```
+
+```{r}
+#ot
+#Medio
+can_ot_medio=1
+
+```
+
+```{r}
+#tv
+#Alto
+can_tv_alto=1
+#Muy alto
+can_tv_mualto=1
+```
+
+Total de cantidad segun los rangos
+
+```{r}
+tl=sum(agrupados$cantidad)
+```
+
+> La probalidad de que un disposito tenga un consumo energetico
+
+-   **Bajo**: 200 a 6000
+
+-   **Medio**: 6000 a 9867
+
+-   **Alto**: 9867 a 14100
+
+-   **Muy alto**: 14100 a 84000
+
+```{r}
+cat("Total de laptop, celular, tablet, audifonos, SmarTv y otros tipos de dispositivo electronico es: ",tl,"\n")
+
+cat("A1: La probabilidad de que el estudiante use audífonos y tenga consumo energetico bajo  es", round((can_audi_bajo/tl), 3), "\n")
+cat("A2: La probabilidad de que el estudiante use audífonos y tenga consumo energetico medio  es", round((0/tl), 3), "\n")
+cat("A3: La probabilidad de que el estudiante use audífonos y tenga consumo energetico alto  es", round((0/tl), 3), "\n")
+cat("A4: La probabilidad de que el estudiante use audífonos y tenga consumo energetico muy alto  es", round((0/tl), 3), "\n")
+
+
+
+cat("B1: La probabilidad de que el estudiante use laptop y tenga consumo energetico bajo  es", round((can_lapt_bajo/tl), 3), "\n")
+cat("B2: La probabilidad de que el estudiante use laptop y tenga consumo energetico medio  es", round((can_lapt_medio/tl), 3), "\n")
+cat("B3: La probabilidad de que el estudiante use laptop y tenga consumo energetico alto  es", round((can_lapt_alto/tl), 3), "\n")
+cat("B4: La probabilidad de que el estudiante use laptop y tenga consumo energetico muy alto  es", round((can_lapt_mualto/tl), 3), "\n")
+
+
+
+cat("C1: La probabilidad de que el estudiante use tablet y tenga consumo energetico bajo  es", round((can_tab_bajo/tl), 3), "\n")
+cat("C2: La probabilidad de que el estudiante use tablet y tenga consumo energetico medio  es", round((can_tab_medio/tl), 3), "\n")
+cat("C3: La probabilidad de que el estudiante use tablet y tenga consumo energetico alto  es", round((can_tab_alto/tl), 3), "\n")
+cat("C4: La probabilidad de que el estudiante use tablet y tenga consumo energetico muy alto  es", round((can_tab_mualto/tl), 3), "\n")
+
+cat("D1: La probabilidad de que el estudiante use Samartv y tenga consumo energetico bajo  es", round((0/tl), 3), "\n")
+cat("D2: La probabilidad de que el estudiante use Samartv y tenga consumo energetico medio  es", round((0/tl), 3), "\n")
+cat("D3: La probabilidad de que el estudiante use Samartv y tenga consumo energetico alto  es", round((can_tv_alto/tl), 3), "\n")
+cat("D4: La probabilidad de que el estudiante use Samartv y tenga consumo energetico muy alto  es", round((can_tv_mualto/tl), 3), "\n")
+
+cat("D1: La probabilidad de que el estudiante use otro y tenga consumo energetico bajo  es", round((0/tl), 3), "\n")
+cat("D2: La probabilidad de que el estudiante use otro y tenga consumo energetico medio  es", round((can_ot_medio/tl), 3), "\n")
+cat("D3: La probabilidad de que el estudiante use otro y tenga consumo energetico alto  es", round((0/tl), 3), "\n")
+cat("D4: La probabilidad de que el estudiante use otro y tenga consumo energetico muy alto  es", round((0/tl), 3), "\n")
+
+
+
+```
+
+*Se tiene un total de 1055 dispositivos electrónicos, donde cada uno puede estar asociado a diferentes niveles de consumo energético. Los audífonos tienen una baja probabilidad de estar asociados con cualquier nivel de consumo energético específico, indicando que rara vez afectan significativamente el consumo. Por otro lado, los laptops tienen una probabilidad relativamente alta de estar relacionados con niveles de consumo energético más altos, sugiriendo que estos dispositivos pueden influir notablemente en el consumo de energía. Las tablets y otros dispositivos muestran una variedad de probabilidades asociadas con diferentes niveles de consumo energético, reflejando su impacto variable en los hábitos de consumo.*
+
+Espacio de resultados teórico y la función de probabilidad con las variables (Tipo de Dispositivo y Consumo Energético Promedio)
+
+```{r}
+
+# Determinación del Espacio de Resultados Teórico y Función de Probabilidad
+
+# Determinamos el espacio de resultados teórico para la variable "Tipo de Dispositivo"
+espacio_resultados_tipo <- unique(DC$TIPO_DISPOSITIVO)
+print(espacio_resultados_tipo)
+
+```
+
+#Determina los tipos únicos de dispositivos en tus datos, proporcionando el espacio de resultados teórico para la variable "Tipo de Dispositivo". Dandonos una lista de los tipos de dispositivos unicos en lo datos:
+
+```{r}
+  # Convertir 'Capacidad bateria(mAh)' a numérico
+  DC$'Capacidad bateria(mAh)' <- as.numeric(as.character(DC$`Capacidad bateria(mAh)`))
+  
+  # Determinar el espacio de resultados teórico para la variable 'Tipo de Dispositivo'
+  espacio_resultados_tipo <- unique(DC$TIPO_DISPOSITIVO)
+  print(espacio_resultados_tipo)
+  
+  # Calcular la función de probabilidad empírica para 'Tipo de Dispositivo'
+  probabilidades_tipo <- DC %>%
+    group_by(TIPO_DISPOSITIVO) %>%
+    summarize(probabilidad = n() / nrow(DC))
+  
+  print(probabilidades_tipo)
+  
+  # Gráfico de probabilidades para 'Tipo de Dispositivo'
+  ggplot(probabilidades_tipo, aes(x = TIPO_DISPOSITIVO, y = probabilidad, fill = TIPO_DISPOSITIVO)) +
+    geom_bar(stat = "identity") +
+    theme_minimal() +
+    labs(title = "Probabilidad Empírica del Tipo de Dispositivo", x = "Tipo de Dispositivo", y = "Probabilidad") +
+    geom_text(aes(label = percent(probabilidad, accuracy = 0.1)), vjust = -0.5, size = 2) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+          plot.title = element_text(size = 14, face = "bold"),
+          legend.position = "none") +
+    scale_fill_brewer(palette = "Set3")
+  
+  # Determinar el espacio de resultados teórico para la variable 'Consumo Energético Promedio'
+  
+  # Determinar los rangos para agrupar los datos de 'Capacidad.bateria.mAh.'
+  DC$Rango_Bateria <- cut(DC$'Capacidad bateria(mAh)', 
+                          breaks = c(0, 2000, 4000, 6000, 8000, Inf), 
+                          right = FALSE, 
+                          labels = c("0-2000", "2000-4000", "4000-6000", "6000-8000", "8000+"))
+  
+  espacio_resultados_bateria <- unique(DC$Rango_Bateria)
+  print(espacio_resultados_bateria)
+  
+  # Calcular la función de probabilidad empírica para 'Consumo Energético Promedio'
+  probabilidades_bateria <- DC %>%
+    group_by(Rango_Bateria) %>%
+    summarize(probabilidad = n() / nrow(DC))
+  
+  print(probabilidades_bateria)
+  
+  # Gráfico de probabilidades para 'Consumo Energético Promedio'
+  ggplot(probabilidades_bateria, aes(x = Rango_Bateria, y = probabilidad, fill = Rango_Bateria)) +
+    geom_bar(stat = "identity") +
+    theme_minimal() +
+    labs(title = "Probabilidad Empírica del Consumo Energético Promedio", x = "Rango de Capacidad de Batería (mAh)", y = "Probabilidad") +
+    scale_fill_brewer(palette = "Set2") +
+    geom_text(aes(label = percent(probabilidad, accuracy = 0.1)), vjust = -0.5, size = 2) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+          plot.title = element_text(size = 14, face = "bold"))
+  
+  # Sección adicional: Probabilidad conjunta de Tipo de Dispositivo y Rango de Consumo Energético
+  # Calcular la función de probabilidad conjunta
+  probabilidades_conjuntas <- DC %>%
+    group_by(TIPO_DISPOSITIVO, Rango_Bateria) %>%
+    summarize(probabilidad = n() / nrow(DC)) %>%
+    ungroup()
+  
+  print(probabilidades_conjuntas)
+  
+  # Gráfico de Probabilidad Conjunta
+  ggplot(probabilidades_conjuntas, aes(x = Rango_Bateria, y = probabilidad, fill = TIPO_DISPOSITIVO)) +
+    geom_bar(stat = "identity", position = "dodge", color = "black", width = 0.7) +
+    theme_minimal() +
+    labs(title = "Probabilidad Conjunta de Tipo de Dispositivo y Consumo Energético Promedio", x = "Rango de Capacidad de Batería (mAh)", y = "Probabilidad") +
+    scale_fill_brewer(palette = "Set3") +
+    geom_text(aes(label = percent(probabilidad, accuracy = 0.1)), position = position_dodge(width = 0.7), vjust = -0.5, size = 2) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+          plot.title = element_text(size = 16, face = "bold"),
+          legend.title = element_text(size = 12, face = "bold"),
+          legend.text = element_text(size = 10))
+```
+
+> PARTE DOS DE LA RUBRICA: ANALIZAR LA INDEPENDENCIA Y DEPENDENCIA DE LOS EVENTOS(DADO QUE YA SUCEDIO, PONER CONDICIONES, BAYES)
+
+```{r}
+# Crear la tabla de frecuencias
+tabla_frecuencias <- table(DC$TIPO_DISPOSITIVO, DC$Rango)
+
+# Convertir la tabla de frecuencias a una tabla de probabilidades
+tabla_probabilidades <- prop.table(tabla_frecuencias)
+
+# Calcular sumas de columnas y agregar como nueva fila
+suma_columnas <- colSums(tabla_probabilidades)
+tabla_probabilidades <- rbind(tabla_probabilidades, TOTAL=suma_columnas)
+
+# Calcular sumas de filas y agregar como nueva columna
+suma_filas <- rowSums(tabla_probabilidades)
+tabla_probabilidades <- cbind(tabla_probabilidades, TOTALES = suma_filas)
+
+# Mostrar la tabla de probabilidades
+print(tabla_probabilidades)
+
+```
+
+## DEPENDENCIA E INDEPENDENCIA DE TIPOS Y CONSUMO
+
+```{r}
+conclusiones <- data.frame(
+  Tipo_Dispositivo = character(),
+  Consumo = character(),
+  P_Tipo = numeric(),
+  P_Consumo = numeric(),
+  P_Conjunta = numeric(),
+  P_Independiente = numeric(),
+  Independencia = character(),
+  stringsAsFactors = FALSE
+)
+
+# Definir una función para verificar la independencia de eventos
+verificar_independencia <- function(tipo, consumo) {
+  P_tipo <- sum(tabla_probabilidades[tipo, ])
+  P_consumo <- sum(tabla_probabilidades[, consumo])
+  P_conjunta <- tabla_probabilidades[tipo, consumo]
+  P_independiente <- round((P_tipo * P_consumo),3)
+  
+  independencia <- ifelse(P_conjunta == P_independiente, "Independientes", "Dependientes")
+  
+  # Agregar los resultados al dataframe
+  conclusiones <<- rbind(conclusiones, data.frame(
+    Tipo_Dispositivo = tipo,
+    Consumo = consumo,
+    P_Tipo = P_tipo,
+    P_Consumo = P_consumo,
+    P_Conjunta = P_conjunta,
+    P_Independiente = P_independiente,
+    Independencia = independencia,
+    stringsAsFactors = FALSE
+  ))
+}
+
+# Tipos de dispositivos
+tipos <- unique(DC$TIPO_DISPOSITIVO)
+
+# Niveles de consumo
+consumos <- unique(DC$Rango)
+
+# Verificar la independencia para cada combinación de tipo y consumo
+for (tipo in tipos) {
+  for (consumo in consumos) {
+    verificar_independencia(tipo, consumo)
+  }
+}
+
+# Mostrar las conclusiones
+print(conclusiones)
+
+# Crear un resumen detallado para cada caso
+for (i in 1:nrow(conclusiones)) {
+  cat("Los eventos '", conclusiones$Tipo_Dispositivo[i], "' y 'consumo ", conclusiones$Consumo[i], "' son ", conclusiones$Independencia[i], ".\n", sep = "")
+  cat("P(", conclusiones$Tipo_Dispositivo[i], "): ", conclusiones$P_Tipo[i], "\n", sep = "")
+  cat("P(", conclusiones$Consumo[i], "): ", conclusiones$P_Consumo[i], "\n", sep = "")
+  cat("P(", conclusiones$Tipo_Dispositivo[i], " y ", conclusiones$Consumo[i], "): ", conclusiones$P_Conjunta[i], "\n", sep = "")
+  cat("P(", conclusiones$Tipo_Dispositivo[i], ") * P(", conclusiones$Consumo[i], "): ", conclusiones$P_Independiente[i], "\n", sep = "")
+  cat("\n")
+}
+
+```
+
+## DEPENDENCIA E INDEPENDECIA ENTRE EVENTOS
+
+### EVENTO INDEPENDIENTE
+
+#### Probabilidad de que un estudiante UTEC del ciclo 2024-1 tenga un consumo energetico bajo de sus audifonos y un consumo energetico bajo de su Smart TV .
+
+E1:Probabilidad de que un estudiante UTEC del ciclo 2024-1 tenga un consumo energetico bajo de sus audifonos
+
+E2:Probabilidad de que un estudiante UTEC del ciclo 2024-1 tenga un consumo energetico bajo de su Smart TV .
+
+```{r}
+# Calcular las probabilidades individuales
+P_audifonos_bajo <- tabla_probabilidades["Audifonos", "Bajo"]
+P_smart_tv_bajo <- tabla_probabilidades["Smart TV", "Bajo"]
+
+# Calcular la probabilidad conjunta
+casos_conjuntos <- nrow(subset(DC, (TIPO_DISPOSITIVO == "Audífonos" & Rango == "Bajo") | 
+                                    (TIPO_DISPOSITIVO == "Smart TV" & Rango == "Bajo")))
+P_conjunta <- round(casos_conjuntos / nrow(DC), 3)
+
+# Calcular la probabilidad conjunta asumiendo independencia
+P_conjunta_independiente <- P_audifonos_bajo * P_smart_tv_bajo
+
+# Verificar la independencia de los eventos
+independencia <- ifelse(P_conjunta == P_conjunta_independiente, "Independientes", "Dependientes")
+
+# Imprimir los resultados
+cat("P(Audífonos y consumo bajo): ", P_audifonos_bajo, "\n")
+cat("P(Smart TV y consumo bajo): ", P_smart_tv_bajo, "\n")
+cat("P(E1 ∩ E2): ", P_conjunta, "\n")
+cat("P(E1) * P(E2): ", P_conjunta_independiente, "\n")
+cat("Los eventos 'audífonos y consumo bajo' y 'Smart TV y consumo bajo' son ", independencia, ".\n", sep = "")
+
+```
+
+-   La ocurrencia de "Audífonos y consumo bajo" no afecta la ocurrencia de "Smart TV y consumo bajo".
+
+-   Esto podría sugerir que los factores que llevan a un bajo consumo de audífonos son diferentes e independientes de los factores que llevan a un bajo consumo de Smart TVs.
+
+-   La independencia de los eventos "Audífonos y consumo bajo" y "Smart TV y consumo bajo" implicaría que el consumo bajo de uno no tiene ningún efecto sobre el consumo bajo del otro.
+
+## EVENTO DEPENDIENTE
+
+#### Probabilidad de que un estudiante UTEC del ciclo 2024-1 tenga un consumo energetico muy alto de celular y un consumo energetico muy alto de su laptop .
+
+E1:Probabilidad de que un estudiante UTEC del ciclo 2024-1 tenga un consumo energetico muy alto de celular
+
+E2:Probabilidad de que un estudiante UTEC del ciclo 2024-1 tenga un consumo energetico muy alto de su laptop .
+
+```{r}
+# Calcular las probabilidades individuales
+P_celular_muyAlto <- tabla_probabilidades["Celular", "Muy Alto"]
+P_laptop_muyAlto <- tabla_probabilidades["Laptop", "Muy Alto"]
+
+# Filtrar los casos donde se cumplan ambas condiciones
+casos_conjuntos <- filter(DC, (TIPO_DISPOSITIVO == "Laptop" & Rango == "Muy Alto") & (TIPO_DISPOSITIVO == "Celular" & Rango == "Muy Alto"))
+
+# Calcular P(E1 ∩ E2) a partir de la frecuencia conjunta y el tamaño total de la muestra
+P_conjunta <- nrow(casos_conjuntos)/nrow(DC)
+
+# Calcular la probabilidad conjunta asumiendo independencia
+P_conjunta_independiente <- P_celular_muyAlto * P_laptop_muyAlto
+
+# Verificar la independencia de los eventos
+independencia <- ifelse(P_conjunta == P_conjunta_independiente, "Independientes", "Dependientes")
+
+# Imprimir los resultados
+cat("P(Celular y consumo muy alto): ", P_celular_muyAlto, "\n")
+cat("P(Laptop y consumo muy alto): ", P_laptop_muyAlto, "\n")
+cat("P(E1 ∩ E2): ", P_conjunta, "\n")
+cat("P(E1) * P(E2): ", P_conjunta_independiente, "\n")
+cat("Los eventos 'celular y consumo muy alto' y 'laptop y consumo muy alto' son ", independencia, ".\n", sep = "")
+
+```
+
+Teorema de Bayes
+
+```{r}
+P_celular_muyAlto 
+P_laptop_muyAlto 
+P_conjunta 
+
+# Calcular P(E2 | E1)
+P_E2_dado_E1 <- P_conjunta / P_laptop_muyAlto
+
+# Calcular P(E1 | E2)
+P_E1_dado_E2 <- P_conjunta / P_celular_muyAlto
+
+cat("P(E2 | E1): ", round(P_E2_dado_E1, 3), "\n")
+cat("P(E1 | E2): ", round(P_E1_dado_E2, 3), "\n")
+
+```
+
+probabilidades condicionales:
+
+-   P(E2∣E1)P(E2 \| E1)P(E2∣E1) es la probabilidad de que ocurra el evento E2 dado que el evento E1 ya ha ocurrido.
+
+-   P(E1∣E2)P(E1 \| E2)P(E1∣E2) es la probabilidad de que ocurra el evento E1 dado que el evento E2 ya ha ocurrido.
+
+En ese caso, ambas probabilidades condicionales son iguales a 0:
+
+-   P(E2∣E1)=0P(E2 \| E1) = 0P(E2∣E1)=0: Esto significa que la probabilidad de que ocurra el evento "Laptop y consumo muy alto" (E2) dado que ya ha ocurrido el evento "Celular y consumo muy alto" (E1) es cero.
+
+-   P(E1∣E2)=0P(E1 \| E2) = 0P(E1∣E2)=0: Esto significa que la probabilidad de que ocurra el evento "Celular y consumo muy alto" (E1) dado que ya ha ocurrido el evento "Laptop y consumo muy alto" (E2) es cero.
+
+Esto tiene sentido en el contexto de los eventos dependientes. La probabilidad condicional P(E2∣E1)=0P(E2 \| E1) = 0P(E2∣E1)=0 indica que si ya sabemos que el evento E1 ha ocurrido (es decir, "Celular y consumo muy alto"), entonces la probabilidad de que ocurra también el evento E2 ("Laptop y consumo muy alto") es nula. Esto sugiere que estos eventos no suelen ocurrir simultáneamente.
+
+De manera similar, P(E1∣E2)=0P(E1 \| E2) = 0P(E1∣E2)=0 indica que si sabemos que el evento E2 ha ocurrido (es decir, "Laptop y consumo muy alto"), entonces la probabilidad de que ocurra también el evento E1 ("Celular y consumo muy alto") es cero. Esto refuerza la idea de que estos eventos están influenciados por la ocurrencia del otro, lo cual es consistente con la dependencia entre ellos.
+
+1.  **Dependencia de eventos:**
+
+    -   Los eventos "consumo energético muy alto de celular" y "consumo energético muy alto de laptop" son dependientes. Esto significa que no hay estudiantes que experimenten ambos consumos altos simultáneamente, lo cual sugiere una relación entre los dos eventos.
+
+2.  **Probabilidades condicionales:**
+
+    -   si un estudiante tiene un consumo energético muy alto en un dispositivo, no tendrá un consumo muy alto en el otro dispositivo.
+
+3.  **Conclusión sobre el comportamiento del consumo energético:**
+
+    -   Es probable que los estudiantes con un alto consumo energético en su celular no usen tanto su laptop y viceversa. Esto podría sugerir que los estudiantes están dividiendo su uso de dispositivos de manera que el uso intensivo de uno excluye el uso intensivo del otro.
+
+# AVANCE 2
+
+Se desea conocer la probabilidad de encontrar 320 personas personas con un consumo alto en una muestra de 1055
+
+Variable Aleatoria
+
+Variable discretas
+
+Consumo y Rango
+
+X1: numero de estudiantes con un consumo alto de una muestra de 1055
+
+Distribucion y parametros
+
+
+
+```{r}
+#casos favorables
+
+nAlto<-filter(DC, Rango == "Alto")
+P_Exito=nrow(nAlto)/nrow(DC)
+P_Exito
+```
+
+*Binomia*
+
+```{r}
+n=320
+
+```
+
+
+
+```{r}
+nAlto <- filter(DC, Rango == "Alto")
+P_Exito <- nrow(nAlto) / nrow(DC)
+print(P_Exito)
+
+# Definir los parámetros de la distribución binomial (ensayos)
+n <- 50
+
+# Crear un rango de valores de x (número de éxitos)
+x <- 0:50
+
+# Calcular la función de probabilidad binomial para cada valor de x
+fx <- dbinom(x, size = 1055, prob = P_Exito)
+
+# Crear un data frame con los resultados
+prob_df <- data.frame(x, fx)
+
+# Mostrar una parte del data frame
+prob_df
+
+
+```
+
+```{r}
+nAlto <- filter(DC, Rango == "Alto")
+P_Exito <- nrow(nAlto) / nrow(DC)
+print(P_Exito)
+
+# Definir los parámetros de la distribución binomial
+n <- 320
+
+# Crear un rango de valores de x (número de éxitos)
+x <- 0:n
+
+# Calcular la función de probabilidad binomial para cada valor de x
+fx <- dbinom(x, size = n, prob = P_Exito)
+
+# Crear un data frame con los resultados
+prob_df <- data.frame(x, fx)
+
+# Mostrar una parte del data frame
+print(head(prob_df))
+
+# Graficar la función de probabilidad binomial
+plot(x, fx,
+     xlim = c(50,110),
+     type = "h",
+     lwd = 0.00000005,
+     col = "blue",
+     main = "Función de probabilidad binomial",
+     ylab = "f(x)",
+     xlab = "Número de éxitos (x)")
+```
+
+```{r}
+which.max(fx)
+```
+80 tiene la probabilidad mas alta
+
+
+```{r}
+max(fx)
+which.max(fx)
+```
+
+La probabilidad más alta de obtener exactamente 81 personas con consumo alto en una muestra de 320 es aproximadamente 0.0514, lo que representa el escenario más probable en esta distribución binomial. Esto sugiere que, dadas las condiciones de la población original, en cualquier muestra de 320 personas, es más probable que se encuentren alrededor de 81 personas con consumo alto.
+
+P(X_1=0) : seleccionar 0 personas con consumo alto en n=1050
+
+dbim
+
+P(X_1=1) : seleccionar 1 personas con consumo alto en n=1050 ...
+
+P(X_1=1050) : seleccionar 2 personas con consumo alto en n=1050
+
+dar grafica de prob vs X_1
+
+sumatoria de Px=1
+
+
+
+```{r}
+# Filtrar los datos para encontrar el consumo alto
+library(dplyr)
+nAlto <- filter(DC, Rango == "Alto")
+P_Exito <- nrow(nAlto) / nrow(DC)
+print(P_Exito)
+
+# Definir los parámetros de la distribución binomial
+n <- 1050
+
+# Crear un rango de valores de X_1 (número de éxitos)
+X_1 <- 0:n
+
+# Calcular la función de probabilidad acumulada binomial para cada valor de X_1
+F_X_1 <- pbinom(X_1, size = n, prob = P_Exito)
+
+# Crear un data frame con los resultados
+cum_prob_df <- data.frame(X_1, F_X_1)
+
+# Mostrar una parte del data frame
+print(head(cum_prob_df))
+
+# Graficar la función de probabilidad acumulada binomial
+plot(X_1, F_X_1,
+     type = "s", # type "s" para escalonado
+     col = "blue",
+     main = "Función de probabilidad acumulada binomial",
+     ylab = "F(X_1)",
+     xlab = "Número de éxitos (X_1)")
+
+# Verificar que la suma de las probabilidades sea igual a 1
+sum_F_X_1 <- sum(F_X_1)
+cat("Suma de F(X_1) =", sum_F_X_1, "\n")
+
+```
+
+Paso5:
+
+muestra 320 estudiantes
+
+P(X1=320)=dbinom(350,n=1050,P_Exito)
+
+```{r}
+P_X1_320<-dbinom(350,1050,P_Exito)
+P_X1_320
+```
+
+Se desea saber la probabilidad de encontrar mas del 30 % de la cantidad de estudiantes con un consumo alto en el estudio de 1050 estudiantes
+
+30%.  1050 =315
+
+P(x1\>315)=pbinom(315,n=320,P_Exito,lower.tail=T
+
+```{r}
+p_x1_350<-dbinom(350, size = 1050, prob = P_Exito)
+p_x1_350
+```
+
+```{r}
+p_X_Mayor314<-pbinom(314, size = 320, prob = P_Exito, lower.tail = FALSE)
+p_X_Mayor314
+p_X_menor314<-pbinom(316, size = 320, prob = P_Exito, lower.tail = TRUE)
+p_X_menor314
+```
+
+2.-Satisfaccion
+
+Se desea saber la probabilidad que el tercer estudiante con una satisfaccion muy buena de su dispositovo sea en la 8va encuesta
+
+Exito: Encontrar a un alumno que tenga una satifaccion de 5 con su dispositivo
+
+X:Cantidad de estudiantes que tengan una satisfaccion muy buena de su dispositivo
+
+```{r}
+tablaf<-table(DC$SATISFACCION)
+tablaf
+```
+
+```{r}
+x<-327
+x
+P_S_5<-327/nrow(DC)
+P_S_5
+```
+
+```{r}
+geom<-function(x1,p){
+  dgeom(x=x1-1,prob = p)
+}
+
+geom(8,P_S_5)
+```
+
+### Variable continua
+
+#### 1.-Tiempo
+
+```{r}
+hist(DC$TIEMPO_DISPOSITIVO)
+
+```
+
+```{r}
+# Suponiendo que DC$TIEMPO_DISPOSITIVO contiene tus datos de tiempo
+
+# Calcular la mediana y la media
+mediana <- median(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE)
+media <- mean(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE)
+
+# Crear el histograma
+hist(DC$TIEMPO_DISPOSITIVO, main = "Histograma de Tiempo de Dispositivo", xlab = "Tiempo", ylab = "Frecuencia")
+
+# Agregar líneas para la mediana y la media
+abline(v = mediana, col = "red", lwd = 2)  # línea roja para la mediana
+abline(v = media, col = "blue", lwd = 2)   # línea azul para la media
+
+# Mostrar la leyenda
+legend("topright", legend = c("Mediana", "Media"), col = c("red", "blue"), lty = 1, lwd = 2)
+
+```
+
+Modelo Exponencial:.
+
+\# Calcular la desviación estándar
+
+desviacion_estandar \<- sd(DC\$\`Capacidad bateria(mAh)\`, na.rm = TRUE)
+
+\# Generar una secuencia de valores para la curva normal
+
+x \<- seq(min(DC\$\`Capacidad bateria(mAh)\`, na.rm = TRUE), max(DC\$\`Capacidad bateria(mAh)\`, na.rm = TRUE), length = 100)
+
+\# Calcular la densidad normal para estos valores
+
+y \<- dnorm(x, mean = media, sd = desviacion_estandar)
+
+\# Superponer la curva de densidad normal
+
+lines(x, y, col = "green", lwd = 2)
+
+\# Mostrar la leyenda
+
+legend("topright", legend = c("Mediana", "Media", "Curva Normal"), col = c("red", "blue", "green"), lty = 1, lwd = 2)
+
+```{r}
+# Calcular la mediana y la media
+mediana <- median(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE)
+media <- mean(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE)
+
+# Crear el histograma
+hist(DC$TIEMPO_DISPOSITIVO, main = "Histograma de Tiempo de Uso de Dispositivo", xlab = "Tiempo de Uso", ylab = "Frecuencia", probability = TRUE)
+
+# Agregar líneas para la mediana y la media
+abline(v = mediana, col = "red", lwd = 2)  # línea roja para la mediana
+abline(v = media, col = "blue", lwd = 2)   # línea azul para la media
+
+# Calcular la desviación estándar
+desviacion_estandar <- sd(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE)
+
+# Generar una secuencia de valores para la curva normal
+x <- seq(min(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE), max(DC$TIEMPO_DISPOSITIVO ,na.rm = TRUE), length = 100)
+
+# Calcular la densidad normal para estos valores
+y <- dnorm(x, mean = media, sd = desviacion_estandar)
+
+# Superponer la curva de densidad normal
+lines(x, y, col = "green", lwd = 2)
+
+# Mostrar la leyenda
+legend("topright", legend = c("Mediana", "Media", "Curva Normal"), col = c("red", "blue", "green"), lty = 1, lwd = 2)
+
+```
+
+**Asimetrico : Sesgada a la izquierda**
+
+**Modelo Exponencial Acumulado F(x)**
+
+Se desea conocer la probabilidad de que un alumno en un dia tenga un tiempo de uso de su dispositivo mayor a 7 horas
+
+
+```{r}
+# Calcular la media del tiempo de uso del dispositivo
+media_t <- mean(DC$TIEMPO_DISPOSITIVO, na.rm = TRUE)
+media_t
+
+
+```
+
+```{r}
+
+
+# Calcular el parámetro lambda
+landa <- 1 / media_t
+print("Valor de Lambda")
+print(landa)
+
+# Calcular la probabilidad de que el tiempo de uso sea mayor a 7 horas
+probabilidad_mayor_7 <- pexp(q = 7, rate = landa, lower.tail = FALSE)
+print("Probabilidad mayor a 7")
+probabilidad_mayor_7
+
+# Graficar la función de distribución acumulativa (CDF) del modelo exponencial
+x <- seq(from = 0, to = 24, by = 0.001)
+fx <- pexp(x, rate = landa)
+plot(x, fx, type = "l", col = "red", lwd = 2, main = "Modelo Exponencial", xlab = "Tiempo (horas)", ylab = "Probabilidad acumulada")
+
+# Agregar líneas y texto explicativo en la gráfica
+abline(v = 7, col = "yellow", lwd = 2)  # Línea vertical en 7 horas
+text(7, 0.5, "7 horas", pos = 4, col = "purple")  # Texto explicativo
+
+```
+
+```{r}
+
+# Calcular la mediana y la media
+mediana <- median(DC$`Capacidad bateria(mAh)`, na.rm = TRUE)
+media <- mean(DC$`Capacidad bateria(mAh)`, na.rm = TRUE)
+
+# Crear el histograma
+hist(DC$`Capacidad bateria(mAh)`, main = "Histograma de Capacidad de Batería", xlab = "Capacidad de Batería (mAh)", ylab = "Frecuencia", probability = TRUE)
+
+# Agregar líneas para la mediana y la media
+abline(v = mediana, col = "red", lwd = 2)  # línea roja para la mediana
+abline(v = media, col = "blue", lwd = 2)   # línea azul para la media
+
+# Calcular la desviación estándar
+desviacion_estandar <- sd(DC$`Capacidad bateria(mAh)`, na.rm = TRUE)
+
+# Generar una secuencia de valores para la curva normal
+x <- seq(min(DC$`Capacidad bateria(mAh)`, na.rm = TRUE), max(DC$`Capacidad bateria(mAh)`, na.rm = TRUE), length = 100)
+
+# Calcular la densidad normal para estos valores
+y <- dnorm(x, mean = media, sd = desviacion_estandar)
+
+# Superponer la curva de densidad normal
+lines(x, y, col = "green", lwd = 2)
+
+# Mostrar la leyenda
+legend("topright", legend = c("Mediana", "Media", "Curva Normal"), col = c("red", "blue", "green"), lty = 1, lwd = 2)
+
+```
+
+Modelo de distribución Normal
+
+Características:
+
+1.  Tiene forma acampanada.
+
+2.  Es simétrica respecto a la recta X = **µ = mediana**
+
+3.  Es asintótica respecto al eje X
+
+Simetrico :
+
+***Modelo de Distribucion normal***
+
+Se desea conocer la probabilidad de que un alumno tenga una dispositivo con una alta capacidad de bateria
+
+```{r}
+summary(DC$`Capacidad bateria(mAh)`,na.rm = TRUE)
+
+```
+
+Bajo:200 a 3785
+
+Medio: 3785 a 4505
+
+Alto :4787 a 5000
+
+Muy Alto : 5000 a 10758
+
+Se desea conocer la proabilidad de que un alumno de la utec tenga un uso de tiempo mayor a 6 shoras
+
+```{r}
+media_c<-mean(DC$`Capacidad bateria(mAh)`)
+media_c
+desviacion_C<-sd(DC$`Capacidad bateria(mAh)`)
+desviacion_C
+P_Consumo30<-pnorm(4787,media_c,desviacion_C,lower.tail=TRUE)
+P_Consumo30
+```
